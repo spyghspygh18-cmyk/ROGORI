@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rogori - Portal de Juegos</title>
+  <style>
+    :root {
+      --bg-dark: #0b1120;
+      --bg-panel: #1e293b;
+      --bg-hover: #334155;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --gold: #fbbf24;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; }
+
+    /* Barra Superior */
+    header {
+      background-color: var(--bg-panel);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+    }
+    .brand { font-size: 1.6rem; font-weight: 900; color: var(--accent); letter-spacing: 2px; }
+    .search-bar {
+      background: var(--bg-dark);
+      border: 1px solid #334155;
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 20px;
+      width: 300px;
+      outline: none;
+    }
+    .search-bar:focus { border-color: var(--accent); }
+    .user-area { display: flex; align-items: center; gap: 16px; }
+    .coins-badge {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    /* Estructura Principal */
+    .layout { display: flex; flex: 1; overflow: hidden; }
+    
+    /* Menú Lateral */
+    aside {
+      width: 230px;
+      background-color: #0f172a;
+      padding: 20px 12px;
+      border-right: 1px solid #1e293b;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      text-align: left;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover, .nav-btn.active { background-color: var(--bg-panel); color: var(--text-main); }
+    .nav-btn.active { border-left: 4px solid var(--accent); }
+
+    /* Área de Contenido */
+    main { flex: 1; padding: 30px; overflow-y: auto; }
+    .section-title { font-size: 1.4rem; margin-bottom: 20px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 22px;
+    }
+
+    /* Tarjetas */
+    .card {
+      background-color: var(--bg-panel);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #334155;
+      transition: transform 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+    .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+    .card-banner {
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+    }
+    .card-body { padding: 16px; }
+    .card-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 6px; }
+    .card-meta { font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+    .btn-action {
+      width: 100%;
+      margin-top: 12px;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--accent);
+      color: #0b1120;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-action:hover { background-color: var(--accent-hover); color: white; }
+
+    /* Ventana Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75);
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal {
+      background: var(--bg-panel);
+      padding: 28px;
+      border-radius: 16px;
+      width: 400px;
+      max-width: 90%;
+      border: 1px solid #475569;
+      text-align: center;
+    }
+    .modal h3 { margin-bottom: 10px; font-size: 1.5rem; }
+    .modal p { color: var(--text-muted); margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">ROGORI</div>
+    <input type="text" id="searchInput" class="search-bar" placeholder="Buscar en Rogori..." onkeyup="filtrarContenido()">
+    <div class="user-area">
+      <div class="coins-badge" id="coinDisplay">🪙 500 Rogos</div>
+      <div>👤 Jugador_Rogori</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <button class="nav-btn active" onclick="cambiarTab('juegos', this)">🎮 Explorar Juegos</button>
+      <button class="nav-btn" onclick="cambiarTab('tienda', this)">🛒 Tienda de Objetos</button>
+      <button class="nav-btn" onclick="cambiarTab('inventario', this)">🎒 Mi Inventario</button>
+    </aside>
+
+    <main>
+      <h2 class="section-title" id="viewTitle">Experiencias Populares</h2>
+      <div class="grid" id="contentGrid"></div>
+    </main>
+  </div>
+
+  <!-- Ventana Modal -->
+  <div class="modal-overlay" id="gameModal">
+    <div class="modal">
+      <div id="modalIcon" style="font-size: 4rem; margin-bottom: 10px;">🚀</div>
+      <h3 id="modalTitle">Título</h3>
+      <p id="modalDesc">Descripción de la experiencia.</p>
+      <button class="btn-action" onclick="cerrarModal()">¡Jugar en Rogori!</button>
+      <button class="btn-action" style="background: #334155; color: white; margin-top: 8px;" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+
+  <script>
+    let rogos = 500;
+    let tabActual = 'juegos';
+    let inventario = [];
+
+    const juegos = [
+      { id: 1, titulo: "Galaxia Infinita", icono: "🚀", jugadores: "2.4k", rating: "95%", desc: "Explora planetas desconocidos y construye tu propia estación espacial." },
+      { id: 2, titulo: "Supervivencia Isla", icono: "🏝️", jugadores: "1.8k", rating: "91%", desc: "Recolecta recursos y sobrevive junto a otros jugadores en una isla misteriosa." },
+      { id: 3, titulo: "Pista Neón", icono: "🏎️", jugadores: "940", rating: "88%", desc: "Compite en carreras futuristas a toda velocidad con autos personalizables." },
+      { id: 4, titulo: "Defensa del Castillo", icono: "🏰", jugadores: "3.1k", rating: "97%", desc: "Protege la fortaleza de oleadas de enemigos mejorando tus torres." }
+    ];
+
+    const tienda = [
+      { id: 101, titulo: "Espada de Plasma", icono: "⚔️", precio: 150 },
+      { id: 102, titulo: "Casco Espacial", icono: "👩‍🚀", precio: 200 },
+      { id: 103, titulo: "Mascota Dragón", icono: "🐉", precio: 350 },
+      { id: 104, titulo: "Alas Cibernéticas", icono: "🦋", precio: 250 }
+    ];
+
+    function renderizar() {
+      const grid = document.getElementById('contentGrid');
+      const filtro = document.getElementById('searchInput').value.toLowerCase();
+      grid.innerHTML = '';
+
+      if (tabActual === 'juegos') {
+        juegos.filter(j => j.titulo.toLowerCase().includes(filtro)).forEach(juego => {
+          grid.innerHTML += `
+            <div class="card" onclick="abrirModal('${juego.titulo}', '${juego.icono}', '${juego.desc}')">
+              <div class="card-banner">${juego.icono}</div>
+              <div class="card-body">
+                <div class="card-title">${juego.titulo}</div>
+                <div class="card-meta">
+                  <span>👍 ${juego.rating}</span>
+                  <span>👤 ${juego.jugadores}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      } else if (tabActual === 'tienda') {
+        tienda.filter(t => t.titulo.toLowerCase().includes(filtro)).forEach(item => {
+          grid.innerHTML += `
+            <div class="card">
+              <div class="card-banner">${item.icono}</div>
+              <div class="card-body">
+                <div class="card-title">${item.titulo}</div>
+                <div class="card-meta"><span>Costo: 🪙 ${item.precio}</span></div>
+                <button class="btn-action" onclick="comprarItem(${item.id})">Comprar</button>
+              </div>
+            </div>
+          `;
+        });
+      } else if (tabActual === 'inventario') {
+        if (inventario.length === 0) {
+          grid.innerHTML = '<p style="color: var(--text-muted);">Aún no tienes objetos en Rogori. Visita la tienda para conseguir algunos.</p>';
+          return;
+        }
+        inventario.forEach(item => {
+          grid.innerHTML += `
+            <div class="card">
+              <div class="card-banner">${item.icono}</div>
+              <div class="card-body">
+                <div class="card-title">${item.titulo}</div>
+                <div class="card-meta"><span>En propiedad</span></div>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function cambiarTab(nuevaTab, boton) {
+      tabActual = nuevaTab;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      boton.classList.add('active');
+      
+      const titulos = {
+        'juegos': 'Experiencias Populares',
+        'tienda': 'Tienda de Accesorios',
+        'inventario': 'Tu Mochila de Objetos'
+      };
+      document.getElementById('viewTitle').innerText = titulos[nuevaTab];
+      renderizar();
+    }
+
+    function comprarItem(id) {
+      const item = tienda.find(i => i.id === id);
+      if (inventario.some(i => i.id === id)) {
+        alert("¡Ya tienes este objeto en tu inventario!");
+        return;
+      }
+      if (rogos >= item.precio) {
+        rogos -= item.precio;
+        inventario.push(item);
+        document.getElementById('coinDisplay').innerText = `🪙 ${rogos} Rogos`;
+        alert(`¡Compraste ${item.titulo}!`);
+      } else {
+        alert("No tienes suficientes Rogos.");
+      }
+    }
+
+    function filtrarContenido() {
+      renderizar();
+    }
+
+    function abrirModal(titulo, icono, desc) {
+      document.getElementById('modalTitle').innerText = titulo;
